@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Manual WebSocket Test</title>
+</head>
+
+<body>
+    <h1>Manual WebSocket Connection Test</h1>
+    <button onclick="testConnection()">Test WebSocket Connection</button>
+    <div id="output"></div>
+
+    <script>
+        function log(message) {
+            document.getElementById('output').innerHTML += '<br>' + message;
+        }
+
+        function testConnection() {
+            const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhYmMiLCJpYXQiOjE3NjIxNTY1ODIsImV4cCI6MTc2MjE2MDE4Mn0.ODuDxf_4OoF0a6N3rUBPyw1MrQhyCyh69PV90Rii4iQ";
+            const wsUrl = `ws://127.0.0.1:8000/ws/${token}`;
+
+            log('🔌 Testing WebSocket connection...');
+            log(`URL: ${wsUrl}`);
+
+            try {
+                const ws = new WebSocket(wsUrl);
+
+                ws.onopen = () => {
+                    log('✅ WebSocket connected successfully!');
+
+                    // Send join conversation
+                    const joinMessage = {
+                        type: 'join_conversation',
+                        conversation_id: 1
+                    };
+                    ws.send(JSON.stringify(joinMessage));
+                    log('📤 Sent join_conversation message');
+                };
+
+                ws.onmessage = (event) => {
+                    log('📩 Received: ' + event.data);
+                };
+
+                ws.onclose = (event) => {
+                    log(`❌ WebSocket closed: ${event.code} - ${event.reason}`);
+                };
+
+                ws.onerror = (error) => {
+                    log('❌ WebSocket error: ' + error);
+                };
+
+            } catch (error) {
+                log('❌ Connection error: ' + error);
+            }
+        }
+    </script>
+</body>
+
+</html>

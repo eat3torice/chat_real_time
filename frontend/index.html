@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Chat App</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Loading Spinner -->
+    <div id="loading" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Đang tải...</p>
+    </div>
+
+    <!-- Auth Container (Login/Register) -->
+    <div id="auth-container" class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>💬 Real-time Chat</h1>
+                <div class="auth-tabs">
+                    <button class="tab-btn active" data-tab="login">Đăng nhập</button>
+                    <button class="tab-btn" data-tab="register">Đăng ký</button>
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <div id="login-form" class="auth-form active">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="login-username">Tên đăng nhập</label>
+                        <input type="text" id="login-username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Mật khẩu</label>
+                        <input type="password" id="login-password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                    </button>
+                </form>
+            </div>
+
+            <!-- Register Form -->
+            <div id="register-form" class="auth-form">
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="register-username">Tên đăng nhập</label>
+                        <input type="text" id="register-username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Email</label>
+                        <input type="email" id="register-email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Mật khẩu</label>
+                        <input type="password" id="register-password" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-confirm-password">Xác nhận mật khẩu</label>
+                        <input type="password" id="register-confirm-password" name="confirmPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i> Đăng ký
+                    </button>
+                </form>
+            </div>
+
+            <div class="auth-footer">
+                <p id="auth-message" class="message"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Chat App -->
+    <div id="chat-container" class="chat-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="user-info">
+                    <div class="avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <h3 id="current-username">User</h3>
+                        <span class="status online">Trực tuyến</span>
+                    </div>
+                    <div class="user-actions">
+                        <button id="profile-btn" class="btn-icon" title="Thông tin cá nhân">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                        <button id="logout-btn" class="btn-icon" title="Đăng xuất">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search -->
+            <div class="search-section">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-input" placeholder="Tìm kiếm bạn bè, tin nhắn...">
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="sidebar-tabs">
+                <button class="tab-btn active" data-tab="conversations">
+                    <i class="fas fa-comments"></i> Trò chuyện
+                </button>
+                <button class="tab-btn" data-tab="friends">
+                    <i class="fas fa-users"></i> Bạn bè
+                </button>
+            </div>
+
+            <!-- Conversations List -->
+            <div id="conversations-tab" class="tab-content active">
+                <div class="section-header">
+                    <h4>Cuộc trò chuyện</h4>
+                    <div class="new-chat-dropdown">
+                        <button id="new-chat-btn" class="btn-icon" title="Cuộc trò chuyện mới">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <div id="new-chat-menu" class="dropdown-menu">
+                            <button id="new-direct-chat-btn" class="dropdown-item">
+                                <i class="fas fa-user"></i> Trò chuyện riêng
+                            </button>
+                            <button id="new-group-chat-btn" class="dropdown-item">
+                                <i class="fas fa-users"></i> Tạo nhóm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div id="conversations-list" class="list">
+                    <!-- Conversations will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Friends List -->
+            <div id="friends-tab" class="tab-content">
+                <div class="section-header">
+                    <h4>Bạn bè</h4>
+                    <button id="add-friend-btn" class="btn-icon" title="Thêm bạn">
+                        <i class="fas fa-user-plus"></i>
+                    </button>
+                </div>
+                <div id="friends-list" class="list">
+                    <!-- Friends will be loaded here -->
+                </div>
+
+                <div class="section-header">
+                    <h4>Lời mời kết bạn</h4>
+                </div>
+                <div id="friend-requests-list" class="list">
+                    <!-- Friend requests will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="main-chat">
+            <!-- Chat Header -->
+            <div id="chat-header" class="chat-header">
+                <div class="chat-info">
+                    <div class="avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="chat-details">
+                        <h3 id="chat-title">Chọn cuộc trò chuyện</h3>
+                        <span id="chat-status" class="status">Trực tuyến</span>
+                    </div>
+                </div>
+                <div class="chat-actions">
+                    <button class="btn-icon" title="Thông tin">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                    <button id="conversation-settings-btn" class="btn-icon" title="Cài đặt">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Messages Area -->
+            <div id="messages-container" class="messages-container">
+                <div id="messages-list" class="messages-list">
+                    <!-- Messages will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Message Input -->
+            <div id="message-input-container" class="message-input-container">
+                <form id="message-form" class="message-form">
+                    <div class="input-group">
+                        <button type="button" class="btn-icon" title="Đính kèm">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                        <input type="text" id="message-input" placeholder="Nhập tin nhắn..." disabled>
+                        <button type="submit" id="send-btn" class="btn-icon send-btn" disabled>
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add Friend Modal -->
+    <div id="add-friend-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Thêm bạn</h3>
+                <button class="close-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="add-friend-form">
+                    <div class="form-group">
+                        <label for="friend-username">Tên đăng nhập</label>
+                        <input type="text" id="friend-username" placeholder="Nhập tên đăng nhập..." required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary close-modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Gửi lời mời</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Chat Modal -->
+    <div id="new-chat-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Cuộc trò chuyện mới</h3>
+                <button class="close-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="friends-for-chat" class="friends-list">
+                    <!-- Friends will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conversation Settings Modal -->
+    <div id="conversation-settings-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Cài đặt cuộc trò chuyện</h3>
+                <button class="close-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="conversation-settings-form">
+                    <div class="form-group">
+                        <label for="conversation-name">Tên cuộc trò chuyện</label>
+                        <input type="text" id="conversation-name" name="name" placeholder="Nhập tên cuộc trò chuyện">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cài đặt quyền hạn</label>
+                        <div class="settings-options">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="allow-member-add" name="allow_member_add">
+                                <span class="checkmark"></span>
+                                Cho phép thành viên thêm người khác
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Thành viên</label>
+                        <div class="members-header">
+                            <button type="button" id="add-member-btn" class="btn-small btn-primary">
+                                <i class="fas fa-user-plus"></i> Thêm thành viên
+                            </button>
+                        </div>
+                        <div id="conversation-members" class="members-list">
+                            <!-- Members will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Advanced Settings (Group only) -->
+                    <div id="advanced-settings" class="form-group" style="display: none;">
+                        <label>Cài đặt nâng cao</label>
+                        <div class="advanced-actions">
+                            <div class="action-group">
+                                <h5>Chuyển quyền admin</h5>
+                                <p class="help-text">Chuyển quyền quản lý nhóm cho thành viên khác</p>
+                                <select id="transfer-admin-select" class="form-control">
+                                    <option value="">Chọn thành viên...</option>
+                                </select>
+                                <button type="button" id="transfer-admin-btn" class="btn btn-warning" disabled>
+                                    <i class="fas fa-crown"></i> Chuyển quyền admin
+                                </button>
+                            </div>
+
+                            <div class="action-group danger-zone">
+                                <h5>Rời nhóm</h5>
+                                <p class="help-text">Bạn sẽ không thể xem tin nhắn và tham gia cuộc trò chuyện này nữa
+                                </p>
+                                <button type="button" id="leave-group-btn" class="btn btn-danger">
+                                    <i class="fas fa-sign-out-alt"></i> Rời nhóm
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary"
+                            onclick="UI.hideModal('conversation-settings-modal')">
+                            <i class="fas fa-times"></i> Hủy
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Lưu thay đổi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Member Modal -->
+    <div id="add-member-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Thêm thành viên</h3>
+                <button class="close-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Chọn bạn bè để thêm vào cuộc trò chuyện</label>
+                    <div id="available-friends" class="friends-list">
+                        <!-- Available friends will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Group Modal -->
+    <div id="create-group-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Tạo nhóm mới</h3>
+                <button class="close-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="create-group-form">
+                    <div class="form-group">
+                        <label for="group-name">Tên nhóm</label>
+                        <input type="text" id="group-name" name="name" placeholder="Nhập tên nhóm..." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Thêm thành viên</label>
+                        <div id="group-friends-list" class="friends-list">
+                            <!-- Friends list with checkboxes will be loaded here -->
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary close-modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Tạo nhóm
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Profile Modal -->
+    <div id="user-profile-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Thông tin cá nhân</h3>
+                <button class="close-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Profile Info Tab -->
+                <div class="profile-tabs">
+                    <button class="profile-tab-btn active" data-tab="profile-info">
+                        <i class="fas fa-user"></i> Thông tin
+                    </button>
+                    <button class="profile-tab-btn" data-tab="profile-password">
+                        <i class="fas fa-lock"></i> Đổi mật khẩu
+                    </button>
+                </div>
+
+                <!-- Profile Information -->
+                <div id="profile-info" class="profile-tab-content active">
+                    <form id="profile-update-form">
+                        <div class="form-group">
+                            <label for="profile-username">Tên đăng nhập</label>
+                            <input type="text" id="profile-username" name="username"
+                                placeholder="Nhập tên đăng nhập mới..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="profile-email">Email</label>
+                            <input type="email" id="profile-email" name="email" placeholder="Nhập email mới..."
+                                required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary close-modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Cập nhật thông tin
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Password Change -->
+                <div id="profile-password" class="profile-tab-content">
+                    <form id="password-update-form">
+                        <div class="form-group">
+                            <label for="current-password">Mật khẩu hiện tại</label>
+                            <input type="password" id="current-password" name="current_password"
+                                placeholder="Nhập mật khẩu hiện tại..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password">Mật khẩu mới</label>
+                            <input type="password" id="new-password" name="new_password"
+                                placeholder="Nhập mật khẩu mới..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm-password">Xác nhận mật khẩu mới</label>
+                            <input type="password" id="confirm-password" name="confirm_password"
+                                placeholder="Nhập lại mật khẩu mới..." required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary close-modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-key"></i> Đổi mật khẩu
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notifications" class="notifications"></div>
+
+    <!-- Scripts -->
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/websocket.js"></script>
+    <script src="/static/js/ui.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+
+</html>

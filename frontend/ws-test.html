@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>WebSocket Test</title>
+</head>
+
+<body>
+    <h1>WebSocket Test</h1>
+    <div id="output"></div>
+    <input type="text" id="messageInput" placeholder="Type message...">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        const ws = new WebSocket('ws://127.0.0.1:8000/ws-test');
+        const output = document.getElementById('output');
+
+        ws.onopen = function (event) {
+            output.innerHTML += '<p>Connected to WebSocket</p>';
+        };
+
+        ws.onmessage = function (event) {
+            output.innerHTML += '<p>Received: ' + event.data + '</p>';
+        };
+
+        ws.onclose = function (event) {
+            output.innerHTML += '<p>WebSocket closed</p>';
+        };
+
+        ws.onerror = function (error) {
+            output.innerHTML += '<p>WebSocket error: ' + error + '</p>';
+        };
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            if (input.value) {
+                ws.send(input.value);
+                input.value = '';
+            }
+        }
+    </script>
+</body>
+
+</html>

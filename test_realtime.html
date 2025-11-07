@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Real-time Message Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .log {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+
+        .controls {
+            margin: 10px 0;
+        }
+
+        input,
+        button {
+            padding: 5px 10px;
+            margin: 5px;
+        }
+
+        .message {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #007bff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Real-time Message Test</h1>
+
+        <div class="controls">
+            <input type="text" id="token" placeholder="Enter JWT token" style="width: 400px;">
+            <button onclick="connectWS()">Connect WebSocket</button>
+            <button onclick="disconnectWS()">Disconnect</button>
+        </div>
+
+        <div class="controls">
+            <input type="number" id="conversationId" placeholder="Conversation ID" value="1">
+            <button onclick="joinConversation()">Join Conversation</button>
+        </div>
+
+        <div class="controls">
+            <input type="text" id="messageContent" placeholder="Type message..." style="width: 300px;">
+            <button onclick="sendMessage()">Send via API</button>
+        </div>
+
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        let ws = null;
+        let currentToken = null;
+
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            messageDiv.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            logDiv.appendChild(messageDiv);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function connectWS() {
+            const token = document.getElementById('token').value;
+            if (!token) {
+                log('❌ Please enter JWT token');
+                return;
+            }
+
+            currentToken = token;
+            const wsUrl = `ws://127.0.0.1:8000/ws/${token}`;
+
+            try {
+                ws = new WebSocket(wsUrl);
+
+                ws.onopen = () => {
+                    log('✅ WebSocket connected successfully');
+                };
+
+                ws.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        log(`📩 Received: ${JSON.stringify(data, null, 2)}`);
+                    } catch (e) {
+                        log(`📩 Raw message: ${event.data}`);
+                    }
+                };
+
+                ws.onclose = (event) => {
+                    log(`❌ WebSocket closed: ${event.code} - ${event.reason}`);
+                };
+
+                ws.onerror = (error) => {
+                    log(`❌ WebSocket error: ${error}`);
+                };
+
+            } catch (error) {
+                log(`❌ Connection error: ${error}`);
+            }
+        }
+
+        function disconnectWS() {
+            if (ws) {
+                ws.close();
+                ws = null;
+                log('🔌 Disconnected');
+            }
+        }
+
+        function joinConversation() {
+            const conversationId = document.getElementById('conversationId').value;
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const message = {
+                    type: 'join_conversation',
+                    conversation_id: parseInt(conversationId)
+                };
+                ws.send(JSON.stringify(message));
+                log(`🏠 Joining conversation ${conversationId}`);
+            } else {
+                log('❌ WebSocket not connected');
+            }
+        }
+
+        async function sendMessage() {
+            const content = document.getElementById('messageContent').value;
+            const conversationId = document.getElementById('conversationId').value;
+
+            if (!content || !currentToken) {
+                log('❌ Please enter message and token');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentToken}`
+                    },
+                    body: JSON.stringify({
+                        conversation_id: parseInt(conversationId),
+                        content: content
+                    })
+                });
+
+                const result = await response.json();
+                log(`📤 Sent message via API: ${JSON.stringify(result)}`);
+                document.getElementById('messageContent').value = '';
+
+            } catch (error) {
+                log(`❌ Send error: ${error}`);
+            }
+        }
+
+        // Auto-fill token if available in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenParam = urlParams.get('token');
+        if (tokenParam) {
+            document.getElementById('token').value = tokenParam;
+        }
+    </script>
+</body>
+
+</html>
