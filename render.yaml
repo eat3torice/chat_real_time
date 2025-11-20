@@ -1,0 +1,34 @@
+services:
+  # Web Service - FastAPI Application
+  - type: web
+    name: chat-real-time
+    env: docker
+    region: singapore
+    plan: free
+    branch: main
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: chat-db
+          property: connectionString
+      - key: REDIS_URL
+        sync: false  # Set manually in dashboard
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 60
+      - key: CREATE_DB_ON_STARTUP
+        value: false
+      - key: PORT
+        value: 8000
+
+databases:
+  # PostgreSQL Database
+  - name: chat-db
+    databaseName: chat_real_time
+    user: chatuser
+    region: singapore
+    plan: free
