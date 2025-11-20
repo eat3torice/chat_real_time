@@ -4,7 +4,10 @@
 
 class APIService {
     constructor() {
-        this.baseURL = 'http://127.0.0.1:8000';
+        // Auto-detect: use current origin if on Render, else localhost
+        this.baseURL = window.location.origin.includes('onrender.com')
+            ? window.location.origin
+            : 'http://127.0.0.1:8000';
         this.token = localStorage.getItem('access_token');
     }
 

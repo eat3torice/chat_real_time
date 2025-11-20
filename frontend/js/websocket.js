@@ -5,7 +5,12 @@
 class WebSocketService {
     constructor() {
         this.ws = null;
-        this.url = 'ws://127.0.0.1:8000/ws';
+        // Auto-detect WebSocket URL
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const host = window.location.origin.includes('onrender.com')
+            ? window.location.host
+            : '127.0.0.1:8000';
+        this.url = `${protocol}//${host}/ws`;
         this.token = null;
         this.currentConversationId = null;
         this.reconnectAttempts = 0;
