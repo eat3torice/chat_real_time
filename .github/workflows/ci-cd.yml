@@ -120,7 +120,12 @@ jobs:
     
     - name: Test Docker image
       run: |
-        docker run --rm chat-real-time:${{ github.sha }} python -c "import app.main; print('✅ Docker build successful!')"
+        docker run --rm \
+          -e DATABASE_URL=postgresql://postgres:testpass123@localhost:5432/chat_test \
+          -e SECRET_KEY=test-secret-key-for-ci-cd-pipeline-only \
+          -e REDIS_URL=redis://localhost:6379/0 \
+          chat-real-time:${{ github.sha }} \
+          python -c "import app.main; print('✅ Docker build successful!')"
 
   # Job 4: Deploy to Render (only on main branch)
   deploy:
