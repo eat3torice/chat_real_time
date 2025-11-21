@@ -20,12 +20,17 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)) -> Any:
     # check username/email uniqueness
     existing = db.query(User).filter(User.username == user_in.username).first()
     if existing:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already taken")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Username already taken"
+        )
 
     if user_in.email:
         existing_email = db.query(User).filter(User.email == user_in.email).first()
         if existing_email:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered",
+            )
 
     user = User(
         username=user_in.username,
@@ -48,9 +53,15 @@ def login_token(user_login: UserLogin, db: Session = Depends(get_db)) -> Any:
     username = user_login.username
     password = user_login.password
 
-    user = db.query(User).filter((User.username == username) | (User.email == username)).first()
+    user = (
+        db.query(User)
+        .filter((User.username == username) | (User.email == username))
+        .first()
+    )
     if not user or not verify_password(password, user.password_hash):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
+        )
 
     # If hash policy changed, re-hash and update DB transparently
     try:
@@ -72,7 +83,9 @@ def get_current_user_info(current_user: User = Depends(get_current_user)) -> Any
     """
     Get current user information.
     """
-    return UserOut(id=current_user.id, username=current_user.username, email=current_user.email)
+    return UserOut(
+        id=current_user.id, username=current_user.username, email=current_user.email
+    )
 
 
 @router.post("/login", response_model=Token)
@@ -86,9 +99,15 @@ def login(user_login: UserLogin, db: Session = Depends(get_db)) -> Any:
     username = user_login.username
     password = user_login.password
 
-    user = db.query(User).filter((User.username == username) | (User.email == username)).first()
+    user = (
+        db.query(User)
+        .filter((User.username == username) | (User.email == username))
+        .first()
+    )
     if not user or not verify_password(password, user.password_hash):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
+        )
 
     # If hash policy changed, re-hash and update DB transparently
     try:

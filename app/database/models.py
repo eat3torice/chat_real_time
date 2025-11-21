@@ -27,8 +27,12 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), default=func.now())
 
     # relationships
-    sent_friend_requests = relationship("Friendship", back_populates="requester", foreign_keys="Friendship.requester_id")
-    received_friend_requests = relationship("Friendship", back_populates="receiver", foreign_keys="Friendship.receiver_id")
+    sent_friend_requests = relationship(
+        "Friendship", back_populates="requester", foreign_keys="Friendship.requester_id"
+    )
+    received_friend_requests = relationship(
+        "Friendship", back_populates="receiver", foreign_keys="Friendship.receiver_id"
+    )
     conversation_memberships = relationship("ConversationMember", back_populates="user")
     messages = relationship("Message", back_populates="sender")
 
@@ -37,20 +41,35 @@ class Friendship(Base):
     __tablename__ = "friendships"
 
     id = Column(Integer, primary_key=True, index=True)
-    requester_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    receiver_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    requester_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    receiver_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     status = Column(Text, nullable=False, default="pending")
     created_at = Column(DateTime(timezone=True), default=func.now())
-    updated_at = Column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
+    updated_at = Column(
+        DateTime(timezone=True), default=func.now(), onupdate=func.now()
+    )
 
     __table_args__ = (
-        UniqueConstraint("requester_id", "receiver_id", name="uq_friendship_requester_receiver"),
-        CheckConstraint("status IN ('pending', 'accepted', 'rejected')", name="chk_friendship_status"),
+        UniqueConstraint(
+            "requester_id", "receiver_id", name="uq_friendship_requester_receiver"
+        ),
+        CheckConstraint(
+            "status IN ('pending', 'accepted', 'rejected')",
+            name="chk_friendship_status",
+        ),
         CheckConstraint("requester_id <> receiver_id", name="chk_friendship_no_self"),
     )
 
-    requester = relationship("User", foreign_keys=[requester_id], back_populates="sent_friend_requests")
-    receiver = relationship("User", foreign_keys=[receiver_id], back_populates="received_friend_requests")
+    requester = relationship(
+        "User", foreign_keys=[requester_id], back_populates="sent_friend_requests"
+    )
+    receiver = relationship(
+        "User", foreign_keys=[receiver_id], back_populates="received_friend_requests"
+    )
 
 
 class Conversation(Base):
@@ -65,22 +84,34 @@ class Conversation(Base):
         CheckConstraint("type IN ('direct', 'group')", name="chk_conversation_type"),
     )
 
-    members = relationship("ConversationMember", back_populates="conversation", cascade="all, delete-orphan")
-    messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan")
+    members = relationship(
+        "ConversationMember",
+        back_populates="conversation",
+        cascade="all, delete-orphan",
+    )
+    messages = relationship(
+        "Message", back_populates="conversation", cascade="all, delete-orphan"
+    )
 
 
 class ConversationMember(Base):
     __tablename__ = "conversation_members"
 
     id = Column(Integer, primary_key=True, index=True)
-    conversation_id = Column(Integer, ForeignKey("conversations.id", ondelete="CASCADE"), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    conversation_id = Column(
+        Integer, ForeignKey("conversations.id", ondelete="CASCADE"), nullable=False
+    )
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     role = Column(Text, nullable=False, default="member")  # admin, member
     joined_at = Column(DateTime(timezone=True), default=func.now())
 
     __table_args__ = (
         UniqueConstraint("conversation_id", "user_id", name="uq_conversation_user"),
-        CheckConstraint("role IN ('admin', 'member')", name="chk_conversation_member_role"),
+        CheckConstraint(
+            "role IN ('admin', 'member')", name="chk_conversation_member_role"
+        ),
     )
 
     conversation = relationship("Conversation", back_populates="members")
@@ -91,8 +122,15 @@ class Message(Base):
     __tablename__ = "messages"
 
     id = Column(BigInteger, primary_key=True, index=True)
-    conversation_id = Column(Integer, ForeignKey("conversations.id", ondelete="CASCADE"), nullable=False, index=True)
-    sender_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    conversation_id = Column(
+        Integer,
+        ForeignKey("conversations.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    sender_id = Column(
+        Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     content = Column(Text, nullable=False)
     created_at = Column(DateTime(timezone=True), default=func.now(), index=True)
 

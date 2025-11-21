@@ -5,11 +5,15 @@ from sqlalchemy.orm import sessionmaker, declarative_base, Session
 from dotenv import load_dotenv
 
 load_dotenv()
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg://postgres:123456789@localhost:5432/chat_real_time")
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql+psycopg://postgres:123456789@localhost:5432/chat_real_time",
+)
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
 
 def get_db() -> Generator[Session, None, None]:
     db = SessionLocal()

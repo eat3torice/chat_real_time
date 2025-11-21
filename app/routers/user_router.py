@@ -18,7 +18,7 @@ def get_current_user_profile(current_user: User = Depends(get_current_user)):
         id=current_user.id,
         username=current_user.username,
         email=current_user.email,
-        created_at=current_user.created_at
+        created_at=current_user.created_at,
     )
 
 
@@ -26,26 +26,30 @@ def get_current_user_profile(current_user: User = Depends(get_current_user)):
 def update_user_profile(
     profile_data: UserProfileUpdate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ) -> Any:
     """Update current user profile (username, email)"""
     try:
         # Check if username already exists (if changed)
         if profile_data.username and profile_data.username != current_user.username:
-            existing_user = db.query(User).filter(
-                User.username == profile_data.username,
-                User.id != current_user.id
-            ).first()
+            existing_user = (
+                db.query(User)
+                .filter(
+                    User.username == profile_data.username, User.id != current_user.id
+                )
+                .first()
+            )
             if existing_user:
                 raise HTTPException(status_code=400, detail="Username already exists")
             current_user.username = profile_data.username
 
         # Check if email already exists (if changed)
         if profile_data.email and profile_data.email != current_user.email:
-            existing_user = db.query(User).filter(
-                User.email == profile_data.email,
-                User.id != current_user.id
-            ).first()
+            existing_user = (
+                db.query(User)
+                .filter(User.email == profile_data.email, User.id != current_user.id)
+                .first()
+            )
             if existing_user:
                 raise HTTPException(status_code=400, detail="Email already exists")
             current_user.email = profile_data.email
@@ -57,7 +61,7 @@ def update_user_profile(
             id=current_user.id,
             username=current_user.username,
             email=current_user.email,
-            created_at=current_user.created_at
+            created_at=current_user.created_at,
         )
 
     except Exception as e:
@@ -71,12 +75,14 @@ def update_user_profile(
 def update_user_password(
     password_data: UserPasswordUpdate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ) -> Dict[str, str]:
     """Update current user password"""
     try:
         # Verify current password
-        if not verify_password(password_data.current_password, current_user.password_hash):
+        if not verify_password(
+            password_data.current_password, current_user.password_hash
+        ):
             raise HTTPException(status_code=400, detail="Current password is incorrect")
 
         # Update password

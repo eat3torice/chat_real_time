@@ -19,7 +19,9 @@ from app.chat.utils import build_message_event, build_error_event
 logger = logging.getLogger("chat.websocket")
 
 
-async def ws_group_handler(websocket: WebSocket, group_id: int, token: Optional[str] = Query(None)):
+async def ws_group_handler(
+    websocket: WebSocket, group_id: int, token: Optional[str] = Query(None)
+):
     """
     WebSocket handler for group chat.
     Connect: ws://host/ws/group/{group_id}?token=<JWT>
@@ -68,11 +70,17 @@ async def ws_group_handler(websocket: WebSocket, group_id: int, token: Optional[
                 # persist message
                 db: Session = SessionLocal()
                 try:
-                    member_ids = await run_in_threadpool(get_conversation_member_ids, db, group_id)
+                    member_ids = await run_in_threadpool(
+                        get_conversation_member_ids, db, group_id
+                    )
                     if user_id not in member_ids:
-                        await websocket.send_json(build_error_event("not a group member"))
+                        await websocket.send_json(
+                            build_error_event("not a group member")
+                        )
                         continue
-                    msg = await run_in_threadpool(create_message, db, group_id, user_id, content)
+                    msg = await run_in_threadpool(
+                        create_message, db, group_id, user_id, content
+                    )
                 finally:
                     db.close()
 

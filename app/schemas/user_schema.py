@@ -23,13 +23,13 @@ class UserProfileUpdate(BaseModel):
     username: Optional[str] = None
     email: Optional[EmailStr] = None
 
-    @validator('username')
+    @validator("username")
     def validate_username(cls, v):
         if v is not None:
             if len(v.strip()) < 3:
-                raise ValueError('Username must be at least 3 characters long')
+                raise ValueError("Username must be at least 3 characters long")
             if len(v.strip()) > 50:
-                raise ValueError('Username must be less than 50 characters')
+                raise ValueError("Username must be less than 50 characters")
         return v.strip() if v else None
 
 
@@ -37,10 +37,10 @@ class UserPasswordUpdate(BaseModel):
     current_password: str
     new_password: str
 
-    @validator('new_password')
+    @validator("new_password")
     def validate_new_password(cls, v):
         if len(v) < 6:
-            raise ValueError('New password must be at least 6 characters long')
+            raise ValueError("New password must be at least 6 characters long")
         return v
 
 

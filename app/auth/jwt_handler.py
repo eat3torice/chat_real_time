@@ -10,7 +10,9 @@ ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
 
 
-def create_access_token(subject: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
+def create_access_token(
+    subject: Dict[str, Any], expires_delta: Optional[timedelta] = None
+) -> str:
     """
     Create JWT token. subject should include at least {'id': <user_id>}.
     We include iat and exp claims.

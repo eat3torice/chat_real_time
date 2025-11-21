@@ -2,10 +2,12 @@ from pydantic import BaseModel
 from typing import Optional, List, Union
 from datetime import datetime
 
+
 class MessageCreate(BaseModel):
     conversation_id: Optional[int] = None  # For conversation-based messaging
-    receiver_id: Optional[int] = None      # For legacy direct messaging
+    receiver_id: Optional[int] = None  # For legacy direct messaging
     content: str
+
 
 class MessageOut(BaseModel):
     id: int
@@ -17,6 +19,7 @@ class MessageOut(BaseModel):
 
     class Config:
         from_attributes = True
+
 
 class ConversationOut(BaseModel):
     id: int

@@ -13,7 +13,7 @@ services:
   postgres:
     image: postgres:15
     container_name: chat_postgres
-    environment:
+    environment: 
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456789
       POSTGRES_DB: chat_real_time

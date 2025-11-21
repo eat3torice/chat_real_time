@@ -33,7 +33,9 @@ def get_current_user_token(token: str = Depends(oauth2_scheme)) -> Dict[str, Any
     return payload
 
 
-def get_current_user_optional_token(token: Optional[str] = None) -> Optional[Dict[str, Any]]:
+def get_current_user_optional_token(
+    token: Optional[str] = None,
+) -> Optional[Dict[str, Any]]:
     """
     Non-raising variant useful for WebSocket or cookie extraction flows.
     """
@@ -47,7 +49,11 @@ def get_current_user_optional_token(token: Optional[str] = None) -> Optional[Dic
 
 # helpers to extract token from request (Authorization header or cookie)
 def extract_token_from_request(request: Request) -> Optional[str]:
-    auth_header = request.headers.get("authorization") or request.headers.get("Authorization") or ""
+    auth_header = (
+        request.headers.get("authorization")
+        or request.headers.get("Authorization")
+        or ""
+    )
     if auth_header.lower().startswith("bearer "):
         return auth_header.split(" ", 1)[1].strip()
     # fallback to cookie "access_token"
@@ -67,8 +73,7 @@ def get_current_user_from_request(request: Request) -> Optional[Dict[str, Any]]:
 
 
 def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    db: Session = Depends(get_db)
+    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
 ) -> User:
     """
     Dependency to get current user from JWT token.
@@ -82,7 +87,7 @@ def get_current_user(
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     user_id = payload.get("id")
     if not user_id:
         raise HTTPException(
@@ -90,7 +95,7 @@ def get_current_user(
             detail="Token missing user id",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(
@@ -98,5 +103,5 @@ def get_current_user(
             detail="User not found",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     return user

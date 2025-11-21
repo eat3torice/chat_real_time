@@ -1,10 +1,12 @@
 from pydantic import BaseModel
 from typing import List, Optional
 
+
 class ConversationCreate(BaseModel):
     name: Optional[str] = None
     type: str = "direct"  # "direct" or "group"
     member_user_ids: Optional[List[int]] = []
+
 
 class ConversationOut(BaseModel):
     id: int

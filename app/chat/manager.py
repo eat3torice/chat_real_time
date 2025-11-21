@@ -16,8 +16,12 @@ logger = logging.getLogger("chat.manager")
 class ConnectionManager:
     def __init__(self):
         self._connections: Dict[int, Set] = defaultdict(set)
-        self._conversation_members: Dict[int, Set[int]] = defaultdict(set)  # conversation_id -> user_ids
-        self._user_conversations: Dict[int, Set[int]] = defaultdict(set)    # user_id -> conversation_ids
+        self._conversation_members: Dict[int, Set[int]] = defaultdict(
+            set
+        )  # conversation_id -> user_ids
+        self._user_conversations: Dict[int, Set[int]] = defaultdict(
+            set
+        )  # user_id -> conversation_ids
         self._pub_channel = os.getenv("REDIS_PUBSUB_CHANNEL", "chat_events")
         self._redis_url = os.getenv("REDIS_URL")
         self._redis: Optional[object] = None  # redis.asyncio.Redis
@@ -51,7 +55,7 @@ class ConnectionManager:
         conversation_id = int(conversation_id)
         self._conversation_members[conversation_id].discard(user_id)
         self._user_conversations[user_id].discard(conversation_id)
-        
+
         # Clean up empty conversation rooms
         if not self._conversation_members[conversation_id]:
             self._conversation_members.pop(conversation_id, None)
@@ -92,7 +96,9 @@ class ConnectionManager:
     async def start(self):
         # start redis subscriber task if redis is configured
         if not self._redis_url or redis_async is None:
-            logger.warning("Redis not configured or redis.asyncio not installed; start() is no-op")
+            logger.warning(
+                "Redis not configured or redis.asyncio not installed; start() is no-op"
+            )
             return
         if self._sub_task and not self._sub_task.done():
             return
