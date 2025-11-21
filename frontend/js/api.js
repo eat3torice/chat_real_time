@@ -49,7 +49,14 @@ class APIService {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.detail || `HTTP error! status: ${response.status}`);
+                let detail = data.detail;
+                if (Array.isArray(detail)) {
+                    // Pydantic validation error dạng mảng
+                    detail = detail.map(e => e.msg || JSON.stringify(e)).join(', ');
+                } else if (typeof detail === 'object' && detail !== null) {
+                    detail = JSON.stringify(detail);
+                }
+                throw new Error(detail || `HTTP error! status: ${response.status}`);
             }
 
             return data;
