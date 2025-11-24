@@ -91,6 +91,7 @@ jobs:
         JWT_ALGORITHM: HS256
         CREATE_DB_ON_STARTUP: true
         ACCESS_TOKEN_EXPIRE_MINUTES: 60
+        REDIS_URL: redis://localhost:6379/0
       run: |
         pytest tests/ -v --cov=app --cov-report=xml --cov-report=term-missing
     
