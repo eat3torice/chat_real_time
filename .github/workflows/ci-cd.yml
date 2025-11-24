@@ -92,7 +92,6 @@ jobs:
         ACCESS_TOKEN_EXPIRE_MINUTES: 60
         CREATE_DB_ON_STARTUP: true
         REDIS_URL: redis://localhost:6379/0
-        REDIS_URL: redis://localhost:6379/0
       run: |
         pytest tests/ -v --cov=app --cov-report=xml --cov-report=term-missing
     
